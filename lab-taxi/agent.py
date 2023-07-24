@@ -12,7 +12,8 @@ class Agent:
         """
         self.nA = nA
         self.Q = defaultdict(lambda: np.zeros(self.nA))
-        self.epsilon = 0.00025
+        self.epsilon = 0.005
+        self.similar_states = dict()
 
     def select_action(self, state):
         """ Given the state, select an action.
@@ -62,3 +63,5 @@ class Agent:
             probs[max_action] = 1 - self.epsilon + self.epsilon / self.nA
 
             self.Q[state][action] = curr_Q + alpha*(reward + np.dot(self.Q[next_state], probs) - curr_Q)
+
+        # Using knowledge of world, update similar state

@@ -87,6 +87,13 @@ class Agent():
 
         ## TODO: compute and minimize the loss
         "*** YOUR CODE HERE ***"
+        output = self.qnetwork_local(states)
+        loss = torch.square_(rewards + gamma*self.qnetwork_target(next_states) - self.qnetwork_local(states))
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
 
         # ------------------- update target network ------------------- #
         self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
