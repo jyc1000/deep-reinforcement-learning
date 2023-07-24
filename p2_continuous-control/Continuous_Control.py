@@ -5,7 +5,7 @@ from collections import deque
 import torch
 
 # env = UnityEnvironment(file_name='Reacher.app')
-env = UnityEnvironment(file_name='Reacher_Windows_x86_64/Reacher.exe')
+env = UnityEnvironment(file_name='Reacher_Windows_x86_64_multiple/Reacher.exe')
 
 
 # get the default brain
@@ -14,7 +14,7 @@ brain = env.brains[brain_name]
 
 
 # reset the environment
-env_info = env.reset(train_mode=True)[brain_name]
+env_info = env.reset(tgrain_mode=True)[brain_name]
 
 # number of agents
 num_agents = len(env_info.agents)
