@@ -2,8 +2,11 @@ from unityagents import UnityEnvironment
 import numpy as np
 import ddpg_agent
 from collections import deque
+import torch
 
-env = UnityEnvironment(file_name='Reacher.app')
+# env = UnityEnvironment(file_name='Reacher.app')
+env = UnityEnvironment(file_name='Reacher_Windows_x86_64/Reacher.exe')
+
 
 # get the default brain
 brain_name = env.brain_names[0]
@@ -27,6 +30,7 @@ state_size = states.shape[1]
 print('There are {} agents. Each observes a state with length: {}'.format(states.shape[0], state_size))
 print('The state for the first agent looks like:', states[0])
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 ddpg_agent = ddpg_agent.Agent(state_size, action_size, 123)
 num_episodes = 200
 scores_window = deque(maxlen=100)
@@ -63,7 +67,8 @@ for i_episode in range(1, num_episodes+1):
         # torch.save(dqn_agent.qnetwork_local.state_dict(), 'checkpoint.pth')
         break
 
-    print('Total score (averaged over agents) this episode: {}'.format(np.mean(scores)))
-    print('Time for one episode is ', time.time()-start)
+    print(f'Episode: {i_episode}. Total score: {np.mean(scores) :.3f}. Device = {device}. Time per episode: {time.time()-start :.2f} seconds')
+    # print(f"Device = {device}; Time per episode: {time.time()-start :.3f} seconds")
+    # print(f"Device = {device}; Time per batch: {(time.time() - start) / 3:.3f} seconds")
 env.close()
 
