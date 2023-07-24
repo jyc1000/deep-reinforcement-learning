@@ -15,8 +15,8 @@ TAU = 1e-3              # for soft update of target parameters
 LR = 5e-4               # learning rate 
 UPDATE_EVERY = 4        # how often to update the network
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+device = "cpu"
 class Agent():
     """Interacts with and learns from the environment."""
 
@@ -72,6 +72,8 @@ class Agent():
         # Epsilon-greedy action selection
         if random.random() > eps:
             return np.argmax(action_values.cpu().data.numpy())
+            # return np.argmax(action_values.data.numpy())
+
         else:
             return random.choice(np.arange(self.action_size))
 
@@ -88,6 +90,28 @@ class Agent():
         ## TODO: compute and minimize the loss
         "*** YOUR CODE HERE ***"
 
+        Q_expected = self.qnetwork_local(states).gather(1, actions)
+        # print(Q_expected.shape)
+        # print(actions.shape)
+        # print("space")
+        Q_all_next_states = self.qnetwork_target(next_states).detach()
+        Q_next_state = Q_all_next_states.max(1)[0].unsqueeze(1)
+        # Double DQN
+        # print(Q_all_next_states.shape)
+        ddqn_argmax = Q_all_next_states.argmax(1).unsqueeze(1)
+        # print(ddqn_argmax.shape)
+        # print(self.qnetwork_local(next_states).shape)
+        ddqn_eval = self.qnetwork_local(next_states).gather(1, ddqn_argmax)
+
+        double_dqn_targets = rewards + (gamma * ddqn_eval * (1-dones))
+        Q_targets = rewards + (gamma * Q_next_state * (1-dones))
+
+        # loss = F.mse_loss(Q_expecteds, Q_targets)
+        loss = F.mse_loss(Q_expected, double_dqn_targets)
+
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         # ------------------- update target network ------------------- #
         self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)                     
 
